@@ -13,7 +13,7 @@ message:
 
 {% note info no-icon %}
 
-参考《Java EE互联网轻量级框架整合开发》、MyBatis官方文档
+参考《Java EE互联网轻量级框架整合开发》、[MyBatis官方文档](https://mybatis.org/mybatis-3/zh/index.html)
 
 {% endnote %}
 
@@ -21,11 +21,21 @@ message:
 
 ---
 
-## MyBatis概述
+## 什么是MyBatis
 
-### 什么是MyBatis
+![mybatis-logo](../图片/MyBatis/mybatis-logo.png)
 
-MyBatis 是一款优秀的持久层框架，它支持自定义 SQL、存储过程以及高级映射。MyBatis 免除了几乎所有的 JDBC 代码以及设置参数和获取结果集的工作。MyBatis 可以通过简单的 XML 或注解来配置和映射原始类型、接口和 Java POJO（Plain Old Java Objects，普通老式 Java 对象）为数据库中的记录。
++ MyBatis 是一款优秀的**持久层**框架，它支持自定义 SQL、存储过程以及高级映射。
+
++ MyBatis 免除了几乎所有的 JDBC 代码以及设置参数和获取结果集的工作。
+
++ MyBatis 可以通过简单的 XML 或注解来配置和映射原始类型、接口和 Java POJO（Plain Old Java Objects，普通老式 Java 对象）为数据库中的记录。
+
+> 持久化：将程序的数据在持久状态和瞬时状态转化的过程
+>
+> 持久层：完成持久化工作的代码
+
+## MyBatis和Hibernate
 
 MyBatis 的前身是 Apache 的开源项目iBatis，是一个基于 Java 的持久层框架。MyBatis 的优势在于灵活，它几乎可以代替 JDBC ，同时提供了接口编程。目前 MyBatis 的数据访问层 DAO (Data Access Objects）是不需要实现类的，它只需要一个接口和 XML（或者注解）。MyBatis 提供自动映射、动态 SQL、级联、缓存、注解、代码和 SQL 分离等特性，使用方便，同时也可以对 SQL 进行优化。因为其具有封装少、映射多样化、支持存储过程、可以进行 SQL 优化等特点，使得它取代了 Hibernate 成为了 Java 互联网中首选的持久框架。
 
@@ -214,17 +224,15 @@ Hibernate 和 MyBatis 的增、删、查、改，对于业务逻辑层来说大�
 
 + 其次，它支持的工具也很有限，不能像 Hibernate 那样有许多的插件可以帮助生成映射代码和关联关系，而即使使用生成工具，往往也需要开发者进一步简化，MyBatis 通过手工编码，工作量相对大些。
 
-所以对于性能要求不太苛刻 的系统，比如管理系统、ERP 等推荐使用 Hibernate；而对于性能要求高、响应快、灵活的系统则推荐使用 MyBatis 。
+所以对于性能要求不太苛刻 的系统，比如管理系统、ERP 等推荐使用 Hibernate；
+
+而对于性能要求高、响应快、灵活的系统则推荐使用 MyBatis 。
 
 ## 获取MyBatis
 
 ### GitHub
 
 GitHub[地址](https://github.com/mybatis/mybatis-3)
-
-**MyBatis SQL Mapper Framework for Java**
-
-The MyBatis SQL mapper framework makes it easier to use a relational database with object-oriented applications. MyBatis couples objects with stored procedures or SQL statements using a XML descriptor or annotations. Simplicity is the biggest advantage of the MyBatis data mapper over object relational mapping tools.
 
 是一个Maven项目，点击Releases，选择版本即可下载
 
@@ -311,11 +319,11 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 ### 创建模块
 
-在父模块下创建mybatis-01的Maven子模块
+在父模块下创建 HelloMybatis 的 Maven 子模块
 
-1、编写mybatis的核心配置文件
+1、编写 Mybatis 的核心配置文件
 
-在mybatis-01模块中的src->main->resources中创建mybatis-config.xml文件，导入以下内容
+在 HelloMybatis 模块中的 src->main->resources 中创建 mybatis-config.xml 配置文件，导入以下内容
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -339,11 +347,43 @@ SET FOREIGN_KEY_CHECKS = 1;
 </configuration>
 ```
 
-并将`property`中的`value`进行修改
+> 注意修改`property`中的不同`name`对应的`value`
+
+其中 `url` 属性可按照以下步骤在IDEA中获取：选择数据库并连接
+
+![image-20201106235625053](../图片/MyBatis/image-20201106235625053.png)
+
+输入用户和密码进行连接，可以先测试连接，正常结果如下图所示
+
+![image-20201106235735036](../图片/MyBatis/image-20201106235735036.png)
+
+> 可能遇到IDEA连接MySQL时的时区问题具体解决方法可见该[博客](https://blog.csdn.net/qq_45181634/article/details/104260296?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~first_rank_v2~rank_v28-15-104260296.nonecase&utm_term=idea%E8%AE%BE%E7%BD%AE%E6%97%B6%E5%8C%BA%E4%B8%BA&spm=1000.2123.3001.4430)
+
+URL如上图显示为
+
+```xml
+jdbc:mysql://localhost:3306
+```
+
+但要进一步配置
+
+```xml
+jdbc:mysql://localhost:3306/mybatis?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8
+
+<!--jdbc:mysql://localhost:3306 标准端口号-->
+<!--mybatis 对应数据库-->
+<!--useSSL=false 不使用SSL-->
+<!--useUnicode=true 使用Unicode编码-->
+<!--characterEncoding=UTF-8 字符编码格式是UTF-8-->
+```
 
 2、编写MyBatis工具类
 
-每个基于 MyBatis 的应用都是以一个 SqlSessionFactory 的实例为核心的。SqlSessionFactory 的实例可以通过 SqlSessionFactoryBuilder 获得。而 SqlSessionFactoryBuilder 则可以从 XML 配置文件或一个预先配置的 Configuration 实例来构建出 SqlSessionFactory 实例。既然有了 SqlSessionFactory，顾名思义，我们可以从中获得 SqlSession 的实例。SqlSession 提供了在数据库执行 SQL 命令所需的所有方法。可以通过 SqlSession 实例来直接执行已映射的 SQL 语句。
+每个基于 MyBatis 的应用都是以一个 SqlSessionFactory 的实例为核心的。
+
+SqlSessionFactory 的实例可以通过 SqlSessionFactoryBuilder 获得。而 SqlSessionFactoryBuilder 则可以从 XML 配置文件或一个预先配置的 Configuration 实例来构建出 SqlSessionFactory 实例。
+
+既然有了 SqlSessionFactory，顾名思义，我们可以从中获得 SqlSession 的实例。SqlSession 提供了在数据库执行 SQL 命令所需的所有方法。可以通过 SqlSession 实例来直接执行已映射的 SQL 语句。
 
 ```java
 // 官方文档
@@ -375,6 +415,25 @@ public class MyBatisUtils {
     public static SqlSession getSqlSession() {
         return sqlSessionFactory.openSession();
     }
+}
+```
+
+既然有了 SqlSessionFactory，顾名思义，我们可以从中获得 SqlSession 的实例。SqlSession 提供了在数据库执行 SQL 命令所需的所有方法。你可以通过 SqlSession 实例来直接执行已映射的 SQL 语句。例如：
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+  Blog blog = (Blog) session.selectOne("org.mybatis.example.BlogMapper.selectBlog", 101);
+}
+```
+
+诚然，这种方式能够正常工作，对使用旧版本 MyBatis 的用户来说也比较熟悉。但现在有了一种更简洁的方式——使用和指定语句的参数和返回值相匹配的接口（比如 BlogMapper.class），现在你的代码不仅更清晰，更加类型安全，还不用担心可能出错的字符串字面值以及强制类型转换。
+
+例如：
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+  BlogMapper mapper = session.getMapper(BlogMapper.class);
+  Blog blog = mapper.selectBlog(101);
 }
 ```
 
