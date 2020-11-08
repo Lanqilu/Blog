@@ -314,8 +314,42 @@ SET FOREIGN_KEY_CHECKS = 1;
         <version>4.12</version>
         <scope>test</scope>
     </dependency>
+    
+    <!-- lombok -->
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+    </dependency>
 </dependencies>
 ```
+
+Maven解决配置文件无法导出的问题
+
+```xml
+<!--解决配置文件无法导出的问题-->
+<build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.properties</include>
+                <include>**/*.xml</include>
+            </includes>
+            <filtering>false</filtering>
+        </resource>
+        <resource>
+            <directory>src/main/java</directory>
+            <includes>
+                <include>**/*.properties</include>
+                <include>**/*.xml</include>
+            </includes>
+            <filtering>false</filtering>
+        </resource>
+    </resources>
+</build>
+```
+
+
 
 ### 创建模块
 
@@ -393,8 +427,8 @@ SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(input
 ```
 
 ```java
+package com.halo.utils;
 public class MyBatisUtils {
-
     /**
      * 提升作用域
      */
@@ -405,18 +439,115 @@ public class MyBatisUtils {
         try {
             String resource = "mybatis-config.xml";
             InputStream inputStream = Resources.getResourceAsStream(resource);
-            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
         }
         catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * 获取SqlSession实例,在此之前需要提升作用域
+     */
     public static SqlSession getSqlSession() {
         return sqlSessionFactory.openSession();
     }
 }
 ```
+
+
+
+### 编写代码
+
+1、创建pojo包并创建User.java
+
+```java
+package com.halo.pojo;
+
+import lombok.Data;
+
+@Data
+public class User {
+    private int id;
+    private String name;
+    private String pwd;
+}
+
+```
+
+2、 在dao包中创建接口
+
+```java
+public interface UserDao {
+    /**
+     * 获取用户列表
+     */
+    List<User> getUserList();
+}
+```
+
+3、从JDBC中的UserDaoImpl转变成UserMapper.xml文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--命名空间 绑定一个对应的Mapper接口-->
+<mapper namespace="com.halo.dao.UserDao">
+    <!--select 查询语句-->
+    <!--id 对应方法名 resultType 返回类型-->
+    <select id="getUserList" resultType="com.halo.pojo.User">
+    select * from mybatis.user;
+  </select>
+</mapper>
+```
+
+### 测试
+
+编写测试类
+
+```java
+public class UserDaoTest {
+    @Test
+    /**
+     * 使用 getMapper
+     */
+    public void testUserDao() {
+        // 获得 sqlSession 对象
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        // 执行 SQL  使用 getMapper 方法
+        UserDao mapper = sqlSession.getMapper(UserDao.class);
+        // 执行方法
+        List<User> userList = mapper.getUserList();
+        // 遍历并输出
+        for (User user : userList) {
+            System.out.println(user);
+        }
+        // 关闭 sqlSession
+        sqlSession.close();
+    }
+
+    @Test
+    /**
+     * 使用 sqlSession.selectList，不建议使用
+     */
+    public void testUserDao2() {
+        // 获得 sqlSession 对象
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        // 获取
+        List<User> userList = sqlSession.selectList("com.halo.dao.UserDao.getUserList");
+        // 遍历并输出
+        for (User user : userList) {
+            System.out.println(user);
+        }
+        // 关闭 sqlSession
+        sqlSession.close();
+    }
+}
+```
+
+对应官网的两种方法
 
 既然有了 SqlSessionFactory，顾名思义，我们可以从中获得 SqlSession 的实例。SqlSession 提供了在数据库执行 SQL 命令所需的所有方法。你可以通过 SqlSession 实例来直接执行已映射的 SQL 语句。例如：
 
@@ -437,33 +568,281 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 }
 ```
 
-### 编写代码
+### 核心
 
-1、创建pojo包并创建User.java
+#### SqlSessionFactoryBuilder
+
+这个类可以被实例化、使用和丢弃，一旦**创建了 SqlSessionFactory，就不再需要它了**。 因此 SqlSessionFactoryBuilder 实例的最佳作用域是方法作用域（也就是局部方法变量）。 你可以重用 SqlSessionFactoryBuilder 来创建多个 SqlSessionFactory 实例，但最好还是不要一直保留着它，以保证所有的 XML 解析资源可以被释放给更重要的事情。
+
+#### SqlSessionFactory
+
+SqlSessionFactory 一旦被创建就应该在应用的运行期间一直存在，没有任何理由丢弃它或重新创建另一个实例。 使用 SqlSessionFactory 的最佳实践是在应用运行期间不要重复创建多次，多次重建 SqlSessionFactory 被视为一种代码“坏习惯”。因此 SqlSessionFactory 的最佳作用域是应用作用域。 有很多方法可以做到，最简单的就是使用单例模式或者静态单例模式。
+
+#### SqlSession
+
+每个线程都应该有它自己的 SqlSession 实例。SqlSession 的实例不是线程安全的，因此是不能被共享的，所以它的最佳的作用域是请求或方法作用域。 绝对不能将 SqlSession 实例的引用放在一个类的静态域，甚至一个类的实例变量也不行。 也绝不能将 SqlSession 实例的引用放在任何类型的托管作用域中，比如 Servlet 框架中吧的 HttpSession。 如果你现在正在使用一种 Web 框架，考虑将 SqlSession 放在一个和 HTTP 请求相似的作用域中。 换句话说，每次收到 HTTP 请求，就可以打开一个 SqlSession，**返回一个响应后，就关闭它**。 这个关闭操作很重要，为了确保每次都能执行关闭操作，你应该把这个关闭操作放到 finally 块中。 下面的示例就是一个确保 SqlSession 关闭的标准模式：
 
 ```java
-public class User {
-    // 变量名与数据库要对应
-    private int id;
-    private String name;
-    private String pwd;
-    
-    /*** setter and getter ***/
-    /*** Constructor ***/
-    /*** toString ***/
+try (SqlSession session = sqlSessionFactory.openSession()) {
+  // 你的应用逻辑代码
 }
 ```
 
-2、 在dao包中创建接口
+在所有代码中都遵循这种使用模式，可以保证所有数据库资源都能被正确地关闭。
+
+## 增删改查 CRUD
+
+在 HelloMybatis 基本结构的基础上进行修改
+
+### SELECT
+
+Mapper代码
 
 ```java
-public interface UserDao {
+public interface UserMapper {
     /**
      * 获取用户列表
+     *
+     * @return UserList
      */
     List<User> getUserList();
+
+    /**
+     * 根据ID查询用户
+     *
+     * @param id 用户ID
+     * @return 对应ID用户
+     */
+    User getUserByID(int id);
 }
 ```
 
-3、创建UserMapper.xml文件
+对应Mapper.xml
+
+```xml
+    <!--select 查询语句-->
+    <!--id 对应方法名 resultType 返回类型(全限定名)-->
+    <select id="getUserList" resultType="com.halo.pojo.User">
+        select *
+        from mybatis.user;
+    </select>
+
+    <!--parameterType 参数类型-->
+    <select id="getUserByID" parameterType="int" resultType="com.halo.pojo.User">
+        select *
+        from mybatis.user
+        where id = #{id};
+    </select>
+```
+
+对应测试类
+
+```java
+    @Test
+    /**
+     * 使用 getMapper
+     */
+    public void testUserMapper() {
+        // 获得 sqlSession 对象
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        // 执行 SQL  使用 getMapper 方法
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        // 执行方法
+        List<User> userList = mapper.getUserList();
+        // 遍历并输出
+        for (User user : userList) {
+            System.out.println(user);
+        }
+        // 关闭 sqlSession
+        sqlSession.close();
+    }
+
+    @Test
+    /**
+     * 使用 sqlSession.selectList，不建议使用
+     */
+    public void testUserMapper2() {
+        // 获得 sqlSession 对象
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        // 获取
+        List<User> userList = sqlSession.selectList("com.halo.dao.UserMapper.getUserList");
+        // 遍历并输出
+        for (User user : userList) {
+            System.out.println(user);
+        }
+        // 关闭 sqlSession
+        sqlSession.close();
+    }
+
+    @Test
+    /**
+     * 测试getUserByID方法
+     */
+    public void testGetUserByID() {
+        // 获得 sqlSession 对象
+        SqlSession sqlSession = MyBatisUtils.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+
+        User user2 = mapper.getUserByID(2);
+        System.out.println("user2 = " + user2);
+
+        // 关闭 sqlSession
+        sqlSession.close();
+    }
+```
+
+### INSERT
+
+Mapper代码
+
+```java
+public interface UserMapper {
+	/**
+     * 插入用户
+     *
+     * @param user User对象
+     * @return null
+     */
+    int addUser(User user);
+}
+```
+
+对应Mapper.xml
+
+```xml
+<!--insert 插入语句-->
+<insert id="addUser" parameterType="com.halo.pojo.User">
+    insert into mybatis.user(id, name, pwd)
+    values (#{id}, #{name}, #{pwd});
+</insert>
+```
+
+对应测试类
+
+```java
+@Test
+/**
+ * 测试addUser方法
+ * 增删改需要提交调事务
+ */
+public void testAddUser() {
+    // 获得 sqlSession 对象
+    SqlSession sqlSession = MyBatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+
+    int halo = mapper.addUser(new User(4, "halo", "123456"));
+    if (halo > 0) {
+        System.out.println("插入成功");
+    }
+
+    // 提交事务
+    sqlSession.commit();
+
+    // 关闭 sqlSession
+    sqlSession.close();
+}
+```
+
+### UPDATE
+
+Mapper代码
+
+```java
+public interface UserMapper {
+    /**
+     * 修改用户
+     *
+     * @param user 用户对象
+     * @return null
+     */
+    int updateUser(User user);
+}
+```
+
+Mapper.xml代码
+
+```xml
+<!--update 修改-->
+<update id="updateUser" parameterType="com.halo.pojo.User">
+    update mybatis.user
+    set name = #{name},
+        pwd=#{pwd}
+    where id = #{id};
+</update>
+```
+
+对应测试类
+
+```java
+@Test
+/**
+ * 测试updateUser方法
+ * 增删改需要提交调事务
+ */
+public void testUpdateUser() {
+    // 获得 sqlSession 对象
+    SqlSession sqlSession = MyBatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+
+    mapper.updateUser(new User(4, "whl", "789789"));
+
+    // 提交事务
+    sqlSession.commit();
+
+    // 关闭 sqlSession
+    sqlSession.close();
+}
+```
+
+### DELETE
+
+Mapper代码
+
+```java
+public interface UserMapper {
+    /**
+     * 删除用户
+     *
+     * @param id 需要删除用户的ID
+     * @return null
+     */
+    int deleteUser(int id);
+}
+```
+
+对应Mapper.xml
+
+```xml
+<!--delete 删除-->
+<delete id="deleteUser" parameterType="int">
+    delete
+    from mybatis.user
+    where id = #{id};
+</delete>
+```
+
+对应测试类
+
+```java
+@Test
+/**
+ * 测试deleteUser方法
+ * 增删改需要提交调事务
+ */
+public void testDeleteUser() {
+    // 获得 sqlSession 对象
+    SqlSession sqlSession = MyBatisUtils.getSqlSession();
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+
+    mapper.deleteUser(4);
+
+    // 提交事务
+    sqlSession.commit();
+
+    // 关闭 sqlSession
+    sqlSession.close();
+}
+```
+
+
 
