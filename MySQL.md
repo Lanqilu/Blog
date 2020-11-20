@@ -7,8 +7,7 @@ categories:
 abstract: "该文章已加密\U0001F512，如需访问请输入密码\U0001F511"
 mathjax: false
 date: 2020-07-07 09:33:36
-password:
-message:
+][message:
 ---
 
 {% note info no-icon %}

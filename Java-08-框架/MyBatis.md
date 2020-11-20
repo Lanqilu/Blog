@@ -844,5 +844,13 @@ public void testDeleteUser() {
 }
 ```
 
+## Mybatis 整体框架
+
+![Mybatis整体架构](../图片/MyBatis/Mybatis整体架构.svg)
+
+### 基础支持层
+
+
+
 
 

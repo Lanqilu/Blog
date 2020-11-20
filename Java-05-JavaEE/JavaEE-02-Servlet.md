@@ -18,6 +18,89 @@ JavaWeb之Servlet，开发动态Web的技术
 
 ---
 
+
+
+
+
+## 响应和请求
+
+### Web容器做了什么
+
+Web容器可创建 Servlet实例，并完成 Servlet名称注册及URI模式的对应。在请求来到时，Web容器会转发给正确的Servlet来处理请求。
+
+当浏览器请求HTTP服务器时，会使用HTTP来传送请求与相关信息（标头、请求参数、Cookie等）HTTP许多信息是通过文字信息来传送，然而 Servlet本质上是个Java对象，运行于web容器（一个Java写的应用程序）中。有关HTTP请求的相关信息，到底如何变成相对应的Java对象呢？
+
+当请求来到HTTP服务器，而HTTP服务器转交请求给容器时，容器会创建一个代表当次请求的 HttpServletRequest 对象，并将请求相关信息设置给该对象。同时，容器会创建一个 HttpServletResponse 对象，作为稍后要对浏览器进行响应的Java对象
+
+![容器收集相关信息并创建代表请求与响应的对象](../图片/JavaEE-02-Servlet/容器收集相关信息并创建代表请求与响应的对象.svg)
+
+接着，容器会根据  @WebServ1et 标注或 web.xml 的设置，找出处理该请求的 Servlet 调用它的 `service()` 方法，将创建的 `HttpServletRequest` 对象、 `HttpServletResponse` 对象传入作为参数，`service()`方法中会根据HTTP请求的方式，调用对应的`doXxx()`方法。例如，若为GET，则调用 `doGet()`方法。
+
+![容器调用Servlet的service方法](../图片/JavaEE-02-Servlet/容器调用Servlet的service方法.svg)
+
+接着在`doGet()`方法中，可以使用 HttpServletRequest 对象、 HttpServletResponse 对象。例如，使用`getParameter()`取得请求参数，使用 `getWriter()`取得输出响应内容，使用的`Printwriter`对象。对 `PrintWriter`做的输出操作，最后会由容器转换为 HTTP 响应，然后再由 HTTP 服务器传送给浏览器。之后容器将HttpServletRequest对象、HttpServletResponse 对象销毁回收，该次请求响应结束。
+
+![容器转换HTTP响应并销毁回收当次请求响应等相关对象](../图片/JavaEE-02-Servlet/容器转换HTTP响应并销毁回收当次请求响应等相关对象.svg)
+
+HTTP是基于请求/响应、无状态的协议，每一次的请求/响应后，Web应用程序就不记得任何浏览器的信息了，而容器每次请求都会创建新的 HttpServletRequest、 HttpServletResponse 对象，响应后将销毁该次的 HttpServletRequest、 HttpServletResponse。下次请求时创建的请求/响应对象就与上一次创建的请求/响应对象无关了，
+
+## HelloServlet
+
+
+
+```java
+@WebServlet("/hello")
+public class HelloServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 设定响应内容类型
+        response.setContentType("text/html;charset=UTF-8");
+
+        // 取得响应输出对象
+        String name = request.getParameter("name");
+
+        // 获取响应的输出流
+        PrintWriter out = response.getWriter();
+
+        out.println("<!DOCTYPE html>");
+        out.println("<html>");
+        out.println("<head>");
+        out.println("<title>Hello</title>");
+        out.println("</head>");
+        out.println("<body>");
+        out.printf("<h1> Hello! %s!%n</h1>", name);
+        out.println("</body>");
+        out.println("</html>");
+    }
+
+}
+
+// http://localhost:8080/HelloServlet_war/hello?name=whl
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## MVC和Model2
+
+
+
+![MVC](../图片/JavaEE-02-Servlet/MVC.svg)
+
+
+
 ## Servlet简介
 
 Servlet其实就是一个遵循Servlet开发的java类。Servlet是由服务器调用的，运行在服务器端。
