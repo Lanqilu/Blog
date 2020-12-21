@@ -844,6 +844,109 @@ public void testDeleteUser() {
 }
 ```
 
+### Map
+
+ 使用Map传参数，直接在SQL中取出key
+
+对象传递参数，直接在SQL中取出对象的属性
+
+
+
+### 模糊查询
+
+```java
+/**
+ * 模糊查询
+ *
+ * @param value 查询值
+ * @return null
+ */
+List<User> getUserLike(String value);
+```
+
+```xml
+<!--模糊查询-->
+<select id="getUserLike" resultType="com.halo.pojo.User">
+    select *
+    from mybatis.user
+    where name like #{value}
+</select>
+```
+
+```java
+@Test
+/**
+ * 模糊查询
+ */
+public void testLike() {
+    // 获得 sqlSession 对象
+    SqlSession sqlSession = MyBatisUtils.getSqlSession();
+    // 执行 SQL  使用 getMapper 方法
+    UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+
+    List<User> like = mapper.getUserLike("%李%");
+
+    for (User user : like) {
+        System.out.println(user);
+    }
+
+
+    // 关闭 sqlSession
+    sqlSession.close();
+}
+```
+
+## 配置解析
+
+MyBatis 的配置文件包含了会深深影响 MyBatis 行为的设置和属性信息。 配置文档的顶层结构如下：
+
+- configuration（配置）
+  - [properties（属性）](https://mybatis.org/mybatis-3/zh/configuration.html#properties)
+  - [settings（设置）](https://mybatis.org/mybatis-3/zh/configuration.html#settings)
+  - [typeAliases（类型别名）](https://mybatis.org/mybatis-3/zh/configuration.html#typeAliases)
+  - [typeHandlers（类型处理器）](https://mybatis.org/mybatis-3/zh/configuration.html#typeHandlers)
+  - [objectFactory（对象工厂）](https://mybatis.org/mybatis-3/zh/configuration.html#objectFactory)
+  - [plugins（插件）](https://mybatis.org/mybatis-3/zh/configuration.html#plugins)
+  - environments（环境配置）
+    - environment（环境变量）
+      - transactionManager（事务管理器）
+      - dataSource（数据源）
+  - [databaseIdProvider（数据库厂商标识）](https://mybatis.org/mybatis-3/zh/configuration.html#databaseIdProvider)
+  - [mappers（映射器）](https://mybatis.org/mybatis-3/zh/configuration.html#mappers)
+
+
+
+###  属性（properties）
+
+编写配置文件
+
+```properties
+driver=com.mysql.jdbc.Driver
+url=jdbc:mysql://localhost:3306/mybatis?useSSL=false&useUnicode=true&characterEncoding=UTF-8
+username=root
+password=123456
+```
+
+在核心配置文件中引入
+
+
+
+### 环境配置（environments）
+
+MyBatis 可以配置成适应多种环境，这种机制有助于将 SQL 映射应用于多种数据库之中， 现实情况下有多种理由需要这么做。
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Mybatis 整体框架
 
 ![Mybatis整体架构](../图片/MyBatis/Mybatis整体架构.svg)
