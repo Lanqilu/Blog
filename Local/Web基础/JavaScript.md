@@ -78,38 +78,28 @@ JavaScript的语法和Java语言类似，每个语句以`;`结束，语句块用
 
 ### 关键字和保留字
 
-ECMA-262 描述了一组具有特定用途的关键字，这些关键字可用于表示控制语句的开始或结束，或者用于执行特定操作等。按照规则，关键字也是语言保留的，不能用作标识符。以下就是 ECMAScript
-的全部关键字（带\*号上标的是第 5 版新增的关键字）：
+ECMA-262 描述了一组具有特定用途的关键字，这些关键字可用于表示控制语句的开始或结束，或者用于执行特定操作等。按照规则，关键字也是语言保留的，不能用作标识符或属性名。ECMA-262 第 6 版规定的所有关键字如下：
 
-| break      | do       | instanceof | typeof |
+| break      | do       | in         | typeof |
 | ---------- | -------- | ---------- | ------ |
-| case       | else     | new        | var    |
-| catch      | finally  | return     | void   |
-| continue   | for      | switch     | while  |
-| debugger\* | function | this       | with   |
+| case       | else     | instanceof | var    |
+| catch      | export   | new        | void   |
+| class      | extends  | return     | while  |
+| const      | finally  | super      |  with  |
+| continue   | for      | switch     |  yield |
+| debugger   | function | this       |        |
 | default    | if       | throw      |        |
-| delete     | in       | try        |        |
+| delete     | import   | try        |        |
 
-ECMA-262 还描述了另外一组不能用作标识符的保留字。尽管保留字在这门语言中还没有任何特定
-的用途，但它们有可能在将来被用作关键字。用星号标记的关键词是 ECMAScript 5 和 6 中的新词。
+规范中也描述了一组未来的保留字，同样不能用作标识符或属性名。虽然保留字在语言中没有特定用途，但它们是保留给将来做关键字用的。 以下是 ECMA-262 第 6 版为将来保留的所有词汇。
 
-| abstract | arguments  | await\*      | boolean   |
-| -------- | ---------- | ------------ | --------- |
-| break    | byte       | case         | catch     |
-| char     | class\*    | const        | continue  |
-| debugger | default    | delete       | do        |
-| double   | else       | enum\*       | eval      |
-| export\* | extends\*  | false        | final     |
-| finally  | float      | for          | function  |
-| goto     | if         | implements   | import\*  |
-| in       | instanceof | int          | interface |
-| let\*     | long       | native       | new       |
-| null     | package    | private      | protected |
-| public   | return     | short        | static    |
-| super\*  | switch     | synchronized | this      |
-| throw    | throws     | transient    | true      |
-| try      | typeof     | var          | void      |
-| volatile | while      | with         | yield     |
+始终保留：`enum`
+
+严格模式下保留：`implements`、`package`、`public`、`interface`、`protected`、`static`、`let`、`private`
+
+模块代码中保留：`await`
+
+这些词汇不能用作标识符，但现在还可以用作对象的属性名。一般来说，最好还是不要使用关键字和保留字作为标识符和属性名，以确保兼容过去和未来的 ECMAScript 版本。
 
 ### 注释
 
@@ -259,9 +249,17 @@ showValue("Hi");
 ### 变量
 
 ECMAScript 的变量是松散类型的，所谓松散类型就是可以用来保存任何类型的数据。与Python变量类似。换句话说，
-每个变量仅仅是一个用于保存值的占位符而已。
+每个变量仅仅是一个用于保存值的占位符而已。有 3 个关键字可以声明变量：`var`、`const` 和 `let`。其中，var 在 ECMAScript 的所有版本中都可以使用，而 `const` 和 `let` 只能在 ECMAScript 6 及更晚的版本中使用。
 
-定义变量时要使用`var`操作符，后跟变量名（即一个标识符）：`var message;`。这行代码定义了一个名为`message` 的变量，该变量可以用来保存任何值，像这样未经过初始化的变量，会保存一个特殊的值—`undefined`。
+#### `var` 关键字
+
+要定义变量，可以使用 `var` 操作符（注意 `var` 是一个关键字），后跟变量名（即标识符，如前所述）：
+
+```javascript
+var message;
+```
+
+这行代码定义了一个名为`message` 的变量，该变量可以用来保存任何类型的值，像这样未经过初始化的变量，会保存一个特殊的值—`undefined`。
 
 ```js
 var message = "world"
@@ -1267,31 +1265,322 @@ var result = (found && someUndefinedVariable);     // 不会发生错误
 alert(result);    // 会执行（"false"）
 ```
 
-TODO P46
+在这个例子中，警告框会显示出来。无论变量 `someUndefinedVariable` 有没有定义，也永远不会对它求值，因为第一个操作数的值是 false。而这也就意味着逻辑与操作的结果必定是 false，根本用不着再对`&&`右侧的操作数求值了。在使用逻辑与操作符时要始终铭记它是一个短路操作符。
+
+③ 逻辑或
+
+逻辑或操作符由两个竖线符号（`||`）表示，有两个操作数，如下面的例子所示：
+
+```javascript
+var result = true || false;
+```
+
+逻辑或的真值表如下：
+
+| 第一个操作数 | 第二个操作数 | 结果  |
+| ------------ | ------------ | ----- |
+| true         | true         | true  |
+| true         | false        | true  |
+| false        | true         | true  |
+| false        | false        | false |
+
+与逻辑与操作相似，如果有一个操作数不是布尔值，逻辑或也不一定返回布尔值；此时，它遵循下列规则：
+
++ 如果第一个操作数是对象，则返回第一个操作数；
++ 如果第一个操作数的求值结果为 false，则返回第二个操作数；
++ 如果两个操作数都是对象，则返回第一个操作数；
++ 如果两个操作数都是 null，则返回 null；
++ 如果两个操作数都是 NaN，则返回 NaN；
++ 如果两个操作数都是 undefined，则返回 undefined。
+
+与逻辑与操作符相似，逻辑或操作符也是短路操作符。也就是说，如果第一个操作数的求值结果为 true，就不会对第二个操作数求值了。下面看一个例子：
+
+```javascript
+var found = true; 
+var result = (found || someUndefinedVariable);     // 不会发生错误 
+alert(result);    // 会执行（"true"）
+```
+
+这个例子跟前面的例子一样，变量 `someUndefinedVariable` 也没有定义。但是，由于变量 `found`的值是 true，而变量 `someUndefinedVariable` 永远不会被求值，因此结果就会输出“true"。如果像下面这个例子一样，把 found 的值改为 false，就会导致错误：
+
+```javascript
+var found = false; 
+var result = (found || someUndefinedVariable);     // 这里会发生错误 
+alert(result);    // 这一行不会执行
+```
+
+我们可以利用逻辑或的这一行为来避免为变量赋 null 或 undefined 值。例如：
+
+```javascript
+var myObject = preferredObject || backupObject;
+```
+
+在这个例子中，变量 `myObject` 将被赋予等号后面两个值中的一个。变量 `preferredObject` 中包含优先赋给变量 `myObject` 的值，变量 `backupObject` 负责在 `preferredObject` 中不包含有效值的情况下提供后备值。如果`preferredObject` 的值不是 null，那么它的值将被赋给 `myObject`；如果是 null，则将 `backupObject` 的值赋给 `myObject`。ECMAScript 程序的赋值语句经常会使用这种模式。
+
+#### 乘性操作符
+
+ECMAScript 定义了 3 个乘性操作符：乘法、除法和求模。这些操作符与 Java、C 或者 Perl 中的相应操作符用途类似，只不过在操作数为非数值的情况下会执行自动的类型转换。如果参与乘性计算的某个操作数不是数值，后台会先使用 `Number()`转型函数将其转换为数值。也就是说，空字符串将被当作0，布尔值 true 将被当作 1。
+
+① 乘法
+
+乘法操作符由一个星号（`*`）表示，用于计算两个数值的乘积。其语法类似于 C，如下面的例子所示：
+
+```javascript
+var result = 34 * 56;
+```
+
+在处理特殊值的情况下，乘法操作符遵循下列特殊的规则：
+
++ 如果操作数都是数值，执行常规的乘法计算，即两个正数或两个负数相乘的结果还是正数，而如果只有一个操作数有符号，那么结果就是负数。如果乘积超过了 ECMAScript 数值的表示范围，则返回 Infinity 或-Infinity；
++ 如果有一个操作数是 NaN，则结果是 NaN；
++ 如果是 Infinity 与 0 相乘，则结果是 NaN；
++ 如果是 Infinity 与非 0 数值相乘，则结果是 Infinity 或-Infinity，取决于有符号操作数的符号；
++ 如果是 Infinity 与 Infinity 相乘，则结果是 Infinity；
++ 如果有一个操作数不是数值，则在后台调用 `Number()`将其转换为数值，然后再应用上面的规则。
+
+② 除法
+
+除法操作符由一个斜线符号（`/`）表示，执行第二个操作数除第一个操作数的计算，如下面的例子所示：
+
+```javascript
+var result = 66 / 11;
+```
+
+与乘法操作符类似，除法操作符对特殊的值也有特殊的处理规则。这些规则如下：
+
++ 如果操作数都是数值，执行常规的除法计算，即两个正数或两个负数相除的结果还是正数，而如果只有一个操作数有符号，那么结果就是负数。如果商超过了 ECMAScript 数值的表示范围，则返回 Infinity 或 -Infinity；
++ 如果有一个操作数是 NaN，则结果是 NaN；
++ 如果是 Infinity 被 Infinity 除，则结果是 NaN；
++ 如果是零被零除，则结果是 NaN；
++ 如果是非零的有限数被零除，则结果是 Infinity 或-Infinity，取决于有符号操作数的符号；
++ 如果是 Infinity 被任何非零数值除，则结果是 Infinity 或-Infinity，取决于有符号操作数的符号；
++ 如果有一个操作数不是数值，则在后台调用 Number()将其转换为数值，然后再应用上面的规则。
+
+③ 求模
+
+求模（余数）操作符由一个百分号（%）表示，用法如下：
+
+```javascript
+var result = 26 % 5;     // 等于等于 1
+```
+
+与另外两个乘性操作符类似，求模操作符会遵循下列特殊规则来处理特殊的值：
+
++ 如果操作数都是数值，执行常规的除法计算，返回除得的余数；
++ 如果被除数是无穷大值而除数是有限大的数值，则结果是 NaN；
++ 如果被除数是有限大的数值而除数是零，则结果是 NaN；
++ 如果是 Infinity 被 Infinity 除，则结果是 NaN；
++ 如果被除数是有限大的数值而除数是无穷大的数值，则结果是被除数；
++ 如果被除数是零，则结果是零；
++ 如果有一个操作数不是数值，则在后台调用 Number()将其转换为数值，然后再应用上面的规则。
+
+#### 加性操作符
+
+加法和减法这两个加性操作符应该说是编程语言中最简单的算术操作符了。但是在 ECMAScript 中，这两个操作符却都有一系列的特殊行为。与乘性操作符类似，加性操作符也会在后台转换不同的数据类型。然而，对于加性操作符而言，相应的转换规则还稍微有点复杂。
+
+① 加法
+
+加法操作符（`+`）的用法如下所示：
+
+```javascript
+var result = 1 + 2;
+```
+
+如果两个操作符都是数值，执行常规的加法计算，然后根据下列规则返回结果：
+
++ 如果有一个操作数是 NaN，则结果是 NaN；
++ 如果是 Infinity 加 Infinity，则结果是 Infinity；
++ 如果是-Infinity 加-Infinity，则结果是-Infinity；
++ 如果是 Infinity 加-Infinity，则结果是 NaN；
++ 如果是+0 加+0，则结果是+0；
++ 如果是-0 加-0，则结果是-0；
++ 如果是+0 加0，则结果是+0。
+
+不过，如果有一个操作数是字符串，那么就要应用如下规则：
+
++ 如果两个操作数都是字符串，则将第二个操作数与第一个操作数拼接起来；
++ 如果只有一个操作数是字符串，则将另一个操作数转换为字符串，然后再将两个字符串拼接起来。
++ 如果有一个操作数是对象、数值或布尔值，则调用它们的 `toString()`方法取得相应的字符串值，然后再应用前面关于字符串的规则。对于 `undefined` 和 `null`，则分别调用 `String()`函数并取得字符串“undefined"和“null"。
+
+下面来举几个例子：
+
+```javascript
+var result1 = 5 + 5;      // 两个数值相加 
+alert(result1);          // 10
+var result2 = 5 + "5";     // 一个数值和一个字符串相加 
+alert(result2);          // "55"
+```
+
+以上代码演示了加法操作符在两种模式下的差别。第一行代码演示了正常的情况，即 5+5 等于 10（数值）。但是，如果将一个操作数改为字符串“5"，结果就变成了“55"（字符串值），因为第一个操作
+数也被转换成了“5"。
+
+忽视加法操作中的数据类型是 ECMAScript 编程中最常见的一个错误。再来看一个例子：
+
+```javascript
+var num1 = 5; 
+var num2 = 10; 
+var message = "The sum of 5 and 10 is " + num1 + num2; 
+alert(message);    // "The sum of 5 and 10 is 510"
+```
+
+在这个例子中，变量 `message` 的值是执行两个加法操作之后的结果。有人可能以为最后得到的字符串是“The sum of 5 and 10 is 15"，但实际的结果却是“The sum of 5 and 10 is 510"。之所以会这样，是因为每个加法操作是独立执行的。第一个加法操作将一个字符串和一个数值 5 拼接了起来，结果是一个字符串。而第二个加法操作又用这个字符串去加另一个数值 10 ，当然也会得到一个字符串。如果想先对数值执行算术计算，然后再将结果与字符串拼接起来，应该像下面这样使用圆括号：
+
+```javascript
+var num1 = 5; 
+var num2 = 10; 
+var message = "The sum of 5 and 10 is " + (num1 + num2); 
+alert(message);    //"The sum of 5 and 10 is 15"
+```
+
+在这个例子中，一对圆括号把两个数值变量括在了一起，这样就会告诉解析器先计算其结果，然后再将结果与字符串拼接起来。因此，就得到了结果“The sum of 5 and 10 is 15"。
+
+② 减法
+
+减法操作符（`-`）是另一个极为常用的操作符，其用法如下所示：
+
+```javascript
+var result = 2 - 1;
+```
+
+与加法操作符类似，ECMAScript 中的减法操作符在处理各种数据类型转换时，同样需要遵循一些特殊规则，如下所示：
+
++ 如果两个操作符都是数值，则执行常规的算术减法操作并返回结果；
++ 如果有一个操作数是 NaN，则结果是 NaN；
++ 如果是 Infinity 减 Infinity，则结果是 NaN；
++ 如果是-Infinity 减-Infinity，则结果是 NaN；
++ 如果是 Infinity 减-Infinity，则结果是 Infinity；
++ 如果是-Infinity 减 Infinity，则结果是-Infinity；
++ 如果是+0 减+0，则结果是+0；
++ 如果是+0 减-0，则结果是-0；
++ 如果是-0 减-0，则结果是+0；
++ 如果有一个操作数是字符串、布尔值、null 或 undefined，则先在后台调用 `Number()`函数将其转换为数值，然后再根据前面的规则执行减法计算。如果转换的结果是 NaN，则减法的结果就是 NaN；
++ 如果有一个操作数是对象，则调用对象的 `valueOf()`方法以取得表示该对象的数值。如果得到的值是 NaN，则减法的结果就是 NaN。如果对象没有 `valueOf()`方法，则调用其 `toString()` 方法并将得到的字符串转换为数值。
+
+下面几个例子展示了上面的规则：
+
+```javascript
+var result1 = 5 - true;    // 4，因为 true 被转换成了 1 
+var result2 = NaN - 1;    // NaN 
+var result3 = 5 - 3;      // 2 
+var result4 = 5 - "";     // 5，因为"" 被转换成了 0 
+var result5 = 5 - "2";    // 3，因为"2"被转换成了 2 
+var result6 = 5 - null;   // 5，因为 null 被转换成了 0
+```
 
 #### 关系操作符
 
-当我们对Number做比较时，可以通过比较运算符得到一个布尔值：
+小于（`<`）、大于（`>`）、小于等于（`<=`）和大于等于（`>=`）这几个关系操作符用于对两个值进行比较，比较的规则与我们在数学课上所学的一样。这几个操作符都返回一个布尔值，如下面的例子所示：
 
 ```javascript
-2 > 5; // false
-5 >= 2; // true
-7 == 7; // true
+var result1 = 5 > 3;   //true 
+var result2 = 5 < 3;   //false
 ```
 
-实际上，JavaScript允许对任意数据类型做比较：
+与 ECMAScript 中的其他操作符一样，当关系操作符的操作数使用了非数值时，也要进行数据转换或完成某些奇怪的操作。以下就是相应的规则：
+
++ 如果两个操作数都是数值，则执行数值比较。
++ 如果两个操作数都是字符串，则比较两个字符串对应的字符编码值。
++ 如果一个操作数是数值，则将另一个操作数转换为一个数值，然后执行数值比较。
++ 如果一个操作数是对象，则调用这个对象的 `valueOf()`方法，用得到的结果按照前面的规则执行比较。如果对象没有 `valueOf()`方法，则调用 `toString()`方法，并用得到的结果根据前面的规则执行比较。
++ 如果一个操作数是布尔值，则先将其转换为数值，然后再执行比较。
+
+在使用关系操作符比较两个字符串时，会执行一种奇怪的操作。很多人都会认为，在比较字符串值时，小于的意思是“在字母表中的位置靠前”，而大于则意味着“在字母表中的位置靠后”，但实际上完全不是那么回事。在比较字符串时，实际比较的是两个字符串中对应位置的每个字符的字符编码值。经过这么一番比较之后，再返回一个布尔值。由于大写字母的字符编码全部小于小写字母的字符编码，因此我们就会看到如下所示的奇怪现象：
 
 ```javascript
-false == 0; // true
-false === 0; // false
+var result = "Brick" < "alphabet";    //true
 ```
 
-要特别注意相等运算符`==`。JavaScript在设计时，有两种比较运算符：
+在这个例子中，字符串“Brick"被认为小于字符串“alphabet"。原因是字母 B 的字符编码为 66，而字母 a 的字符编码是 97。如果要真正按字母表顺序比较字符串，就必须把两个操作数转换为相同的大小写形式（全部大写或全部小写），然后再执行比较，如下所示：
 
-+ 第一种是`==`比较，它会自动转换数据类型再比较，很多时候，会得到非常诡异的结果；（类型不一样，值一样，会判断为true）
-+ 第二种是`===`比较，它不会自动转换数据类型，如果数据类型不一致，返回`false`，如果一致，再比较。（类型和值都需要相等，才为true）
+```javascript
+var result = "Brick".toLowerCase() < "alphabet".toLowerCase(); //false
+```
 
-⭐由于JavaScript这个设计缺陷，**不要**使用`==`比较，始终坚持使用`===`比较。
+通过将两个操作数都转换为小写形式，就可以得出“alphabet"按字母表顺序排在“Brick"之前的正确判断了。
+
+另一种奇怪的现象发生在比较两个数字字符串的情况下，比如下面这个例子：
+
+```javascript
+var result = "23" < "3";    //true
+```
+
+确实，当比较字符串“23"是否小于“3"时，结果居然是 true。这是因为两个操作数都是字符串，而字符串比较的是字符编码（“2"的字符编码是 50，而“3"的字符编码是 51）。不过，如果像下面例子中一样，将一个操作数改为数值，比较的结果就正常了：
+
+```javascript
+var result = "23" < 3;    //false
+```
+
+此时，字符串“23"会被转换成数值 23，然后再与 3 进行比较，因此就会得到合理的结果。在比较数值和字符串时，字符串都会被转换成数值，然后再以数值方式与另一个数值比较。当然，这个规则对前面的例子是适用的。可是，如果那个字符串不能被转换成一个合理的数值呢？比如：
+
+```javascript
+var result = "a" < 3;    // false，因为"a"被转换成了 NaN
+```
+
+由于字母“a"不能转换成合理的数值，因此就被转换成了 NaN。根据规则，任何操作数与 NaN 进行
+关系比较，结果都是 false。于是，就出现了下面这个有意思的现象：
+
+```javascript
+var result1 = NaN < 3;    //false 
+var result2 = NaN >= 3;   //false
+```
+
+按照常理，如果一个值不小于另一个值，则一定是大于或等于那个值。然而，在与 NaN 进行比较时，这两个比较操作的结果都返回了 false。
+
+#### 相等操作符
+
+确定两个变量是否相等是编程中的一个非常重要的操作。在比较字符串、数值和布尔值的相等性时，问题还比较简单。但在涉及到对象的比较时，问题就变得复杂了。最早的 ECMAScript 中的相等和不等操作符会在执行比较之前，先将对象转换成相似的类型。后来，有人提出了这种转换到底是否合理的质疑。最后，ECMAScript 的解决方案就是提供两组操作符：**相等和不相等**——先转换再比较，**全等和不全等**——仅比较而不转换。
+
+① 相等和不相等
+
+ECMAScript 中的相等操作符由两个等于号（`==`）表示，如果两个操作数相等，则返回 true。而不相等操作符由叹号后跟等于号（`!=`）表示，如果两个操作数不相等，则返回 true。这两个操作符都会先转换操作数（通常称为强制转型），然后再比较它们的相等性。
+
+在转换不同的数据类型时，相等和不相等操作符遵循下列基本规则：
+
++ 如果有一个操作数是布尔值，则在比较相等性之前先将其转换为数值——false 转换为 0，而 true 转换为 1；
++ 如果一个操作数是字符串，另一个操作数是数值，在比较相等性之前先将字符串转换为数值；
++ 如果一个操作数是对象，另一个操作数不是，则调用对象的 `valueOf()`方法，用得到的基本类型值按照前面的规则进行比较；
+
+这两个操作符在进行比较时则要遵循下列规则：
+
++ null 和 undefined 是相等的。
++ 要比较相等性之前，不能将 null 和 undefined 转换成其他任何值。
++ 如果有一个操作数是 NaN，则相等操作符返回 false，而不相等操作符返回 true。重要提示：即使两个操作数都是 NaN，相等操作符也返回 false；因为按照规则，NaN 不等于 NaN。
++ 如果两个操作数都是对象，则比较它们是不是同一个对象。如果两个操作数都指向同一个对象，则相等操作符返回 true；否则，返回 false。
+
+下表列出了一些特殊情况及比较结果：
+
+| 表达式              | 值    | 表达式           | 值    |
+| ------------------- | ----- | ---------------- | ----- |
+| `null == undefined` | true  | `true == 1`      | true  |
+| `"NaN" == NaN`      | false | `true == 2`      | false |
+| `5 == NaN`          | false | `undefined == 0` | false |
+| `NaN == NaN`        | false | `null == 0`      | false |
+| `NaN != NaN`        | true  | `"5"==5`         | true  |
+| `false == 0`        | true  |                  |       |
+
+② 全等和不全等
+
+除了在比较之前不转换操作数之外，全等和不全等操作符与相等和不相等操作符没有什么区别。全等操作符由 3 个等于号（`===`）表示，它只在两个操作数未经转换就相等的情况下返回 true，如下面的例子所示：
+
+```javascript
+var result1 = ("55" == 55);    //true，因为转换后相等 
+var result2 = ("55" === 55);  //false，因为不同的数据类型不相等
+```
+
+在这个例子中，第一个比较使用的是相等操作符比较字符串“55"和数值 55，结果返回了 true。如前所述，这是因为字符串“55"先被转换成了数值 55，然后再与另一个数值 55 进行比较。第二个比较使用了全等操作符以不转换数值的方式比较同样的字符串和值。在不转换的情况下，字符串当然不等于数值，因此结果就是 false。
+
+不全等操作符由一个叹号后跟两个等于号（`!==`）表示，它在两个操作数未经转换就不相等的情况下返回 true。例如：
+
+```javascript
+var result1 = ("55" != 55);     //false，因为转换后相等 
+var result2 = ("55" !== 55);    //true，因为不同的数据类型不相等
+```
+
+在这个例子中，第一个比较使用了不相等操作符，而该操作符会将字符串“55"转换成 55，结果就与第二个操作数（也是 55）相等了。而由于这两个操作数被认为相等，因此就返回了 false。第二个比较使用了不全等操作符。假如我们这样想：字符串 55 与数值 55 不相同吗？，那么答案一定是：是的（true）。
+
+记住：null == undefined 会返回 true，因为它们是类似的值；但 `null === undefined` 会返回 false，因为它们是不同类型的值。
+
+> 由于相等和不相等操作符存在类型转换问题，而为了保持代码中数据类型的完整性，推荐使用全等和不全等操作符。
 
 另一个例外是`NaN`这个特殊的Number与**所有其他值都不相等，包括它自己**：
 
@@ -1316,6 +1605,67 @@ isNaN(NaN); // true
 ```javascript
 Math.abs(1 / 3 - (1 - 2 / 3)) < 0.0000001; // true
 ```
+
+#### 条件操作符
+
+条件操作符应该算是 ECMAScript 中最灵活的一种操作符了，而且它遵循与 Java 中的条件操作符相同的语法形式，如下面的例子所示：
+
+```javascript
+variable = boolean_expression ? true_value : false_value;
+```
+
+本质上，这行代码的含义就是基于对 `boolean_expression` 求值的结果，决定给变量 `variable`赋什么值。如果求值结果为 true，则给变量 `variable` 赋 `true_value` 值；如果求值结果为 false，则给变量 `variable` 赋 `false_value` 值。再看一个例子：
+
+```javascript
+var max = (num1 > num2) ? num1 : num2;
+```
+
+在这个例子中，`max` 中将会保存一个最大的值。这个表达式的意思是：如果 `num1` 大于 `num2`（关系表达式返回 true），则将 `num1` 的值赋给 `max`；如果 `num1` 小于或等于 `num2`（关系表达式返回 false），
+则将 `num2` 的值赋给 max。
+
+#### 赋值操作符
+
+简单的赋值操作符由等于号（`=`）表示，其作用就是把右侧的值赋给左侧的变量，如下面的例子所示：
+
+```javascript
+var num = 10;
+```
+
+如果在等于号（`=`）前面再添加乘性操作符、加性操作符或位操作符，就可以完成复合赋值操作。这种复合赋值操作相当于是对下面常规表达式的简写形式：
+
+```javascript
+var num = 10; 
+num += 10; // 等价于 num = num + 10;
+```
+
+每个主要算术操作符（以及个别的其他操作符）都有对应的复合赋值操作符。这些操作符如下所示：
+
++ 乘赋值（`*=`）；
++ 除赋值（`/=`）；
++ 模赋值（`%=`）；
++ 加赋值（`+=`）；
++ 减赋值（`-=`）；
++ 左移赋值（`<<=`）；
++ 有符号右移赋值（`>>=`）；
++ 无符号右移赋值（`>>>=`）。
+
+设计这些操作符的主要目的就是简化赋值操作。使用它们不会带来任何性能的提升。
+
+#### 逗号操作符
+
+使用逗号操作符可以在一条语句中执行多个操作，如下面的例子所示：
+
+```javascript
+var num1=1, num2=2, num3=3;
+```
+
+逗号操作符多用于声明多个变量；但除此之外，逗号操作符还可以用于赋值。在用于赋值时，逗号操作符总会返回表达式中的最后一项，如下面的例子所示：
+
+```javascript
+var num = (5, 1, 4, 8, 0); // num 的值为 0
+```
+
+由于 0 是表达式中的最后一项，因此 `num` 的值就是 0。虽然逗号的这种使用方式并不常见，但这个例子可以帮我们理解逗号的这种行为。
 
 ### 数组
 
@@ -1668,229 +2018,606 @@ i = 10; // i现在是全局变量
 
 ## 语句
 
-### 条件判断
+ECMA-262 规定了一组语句（也称为流控制语句）。从本质上看，语句定义了 ECMAScript 中的主要语法，语句通常使用一或多个关键字来完成给定任务。语句可以很简单，例如通知函数退出；也可以比较复杂，例如指定重复执行某个命令的次数。
 
-JavaScript使用`if () { ... } else { ... }`来进行条件判断。例如，根据年龄显示不同内容，可以用`if`语句实现如下：
+### if语句
+
+大多数编程语言中最为常用的一个语句就是 if 语句。以下是 if 语句的语法：
 
 ```javascript
-var age = 20;
-if (age >= 18) { // 如果age >= 18为true，则执行if语句块
-    alert('adult');
-} else { // 否则执行else语句块
-    alert('teenager');
+if (condition) statement1 else statement2
+```
+
+其中的 condition（条件）可以是任意表达式；而且对这个表达式求值的结果不一定是布尔值。ECMAScript 会自动调用 `Boolean()`转换函数将这个表达式的结果转换为一个布尔值。如果对 condition 求值的结果是 true，则执行 statement1（语句 1），如果对 condition 求值的结果是 false，则执行 statement2（语句 2）。而且这两个语句既可以是一行代码，也可以是一个代码块（以一对花括号括起来的多行代码）。请看下面的例子。
+
+```javascript
+if (i > 25) 
+    alert("Greater than 25.");             // 单行语句 
+else { 
+    alert("Less than or equal to 25.");    // 代码块中的语句 
 }
 ```
 
-其中`else`语句是可选的。如果语句块只包含一条语句，那么可以省略`{}`：
+不过，业界普遍推崇的最佳实践是始终使用代码块，即使要执行的只有一行代码。因为这样可以消除人们的误解，否则可能让人分不清在不同条件下要执行哪些语句。
+
+另外，也可以像下面这样把整个 if 语句写在一行代码中：
 
 ```javascript
-var age = 20;
-if (age >= 18)
-    alert('adult');
-else
-    alert('teenager');
+if (condition1) statement1 else if (condition2) statement2 else statement3
 ```
 
-### 多行条件判断
-
-如果还要更细致地判断条件，可以使用多个`if...else...`的组合：
+但推荐的做法则是像下面这样：
 
 ```javascript
-var age = 3;
-if (age >= 18) {
-    alert('adult');
-} else if (age >= 6) {
-    alert('teenager');
-} else {
-    alert('kid');
+if (i > 25) { 
+    alert("Greater than 25."); 
+} else if (i < 0) { 
+    alert("Less than 0."); 
+} else { 
+    alert("Between 0 and 25, inclusive."); 
 }
 ```
 
-上述多个`if...else...`的组合实际上相当于两层`if...else...`：
+### do-while语句
+
+do-while 语句是一种后测试循环语句，即只有在循环体中的代码执行之后，才会测试出口条件。换句话说，在对条件表达式求值之前，循环体内的代码至少会被执行一次。以下是 do-while 语句的语法：
 
 ```javascript
-var age = 3;
-if (age >= 18) {
-    alert('adult');
-} else {
-    if (age >= 6) {
-        alert('teenager');
-    } else {
-        alert('kid');
+do { 
+    statement 
+} while (expression);
+```
+
+下面是一个示例：
+
+```javascript
+var i = 0; 
+do { 
+   i += 2; 
+} while (i < 10); 
+ 
+alert(i);
+```
+
+在这个例子中，只要变量 i 的值小于 10，循环就会一直继续下去。而且变量 i 的值最初为 0，每次循环都会递增 2。
+
+像 do-while 这种后测试循环语句最常用于循环体中的代码至少要被执行一次的情形。
+
+### while语句
+
+while 语句属于前测试循环语句，也就是说，在循环体内的代码被执行之前，就会对出口条件求值。因此，循环体内的代码有可能永远不会被执行。以下是 while 语句的语法：
+
+```javascript
+while(expression) statement
+```
+
+下面是一个示例：
+
+```javascript
+var i = 0; 
+while (i < 10) {
+    i += 2; 
+}
+```
+
+在这个例子中，变量 i 开始时的值为 0，每次循环都会递增 2。而只要 i 的值小于 10，循环就会继续下去。
+
+### for语句
+
+for 语句也是一种前测试循环语句，但它具有在执行循环之前初始化变量和定义循环后要执行的代码的能力。以下是 for 语句的语法：
+
+```javascript
+for (initialization; expression; post-loop-expression) statement
+```
+
+下面是一个示例：
+
+```javascript
+var count = 10; 
+for (var i = 0; i < count; i++){ 
+    alert(i); 
+}
+```
+
+以上代码定义了变量 i 的初始值为 0。只有当条件表达式（`i<count`）返回 true 的情况下才会进入 for 循环，因此也有可能不会执行循环体中的代码。如果执行了循环体中的代码，则一定会对循环后的表达式（`i++`）求值，即递增 i 的值。这个 for 循环语句与下面的 while 语句的功能相同：
+
+```javascript
+var count = 10; 
+var i = 0; 
+while (i < count){ 
+    alert(i); 
+    i++; 
+}
+```
+
+使用 while 循环做不到的，使用 for 循环同样也做不到。也就是说，for 循环只是把与循环有关的代码集中在了一个位置。
+
+有必要指出的是，在 for 循环的变量初始化表达式中，也可以不使用 var 关键字。该变量的初始化可以在外部执行，例如：
+
+```javascript
+var count = 10; 
+var i; 
+for (i = 0; i < count; i++){ 
+    alert(i); 
+}
+```
+
+以上代码与在循环初始化表达式中声明变量的效果是一样的。由于 ECMAScript 中不存在块级作用域，因此在循环内部定义的变量也可以在外部访问到。例如：
+
+```javascript
+var count = 10; 
+for (var i = 0; i < count; i++){
+    alert(i); 
+} 
+alert(i);    //10
+```
+
+在这个例子中，会有一个警告框显示循环完成后变量 i 的值，这个值是 10。这是因为，即使 i 是在循环内部定义的一个变量，但在循环外部仍然可以访问到它。
+
+此外，for 语句中的初始化表达式、控制表达式和循环后表达式都是可选的。将这三个表达式全部省略，就会创建一个无限循环，例如：
+
+```javascript
+for (;;) {   // 无限循环 
+    doSomething(); 
+}
+```
+
+而只给出控制表达式实际上就把 for 循环转换成了 while 循环，例如：
+
+```javascript
+var count = 10; 
+var i = 0; 
+for (; i < count; ){ 
+    alert(i); 
+    i++; 
+}
+```
+
+由于 for 语句存在极大的灵活性，因此它也是 ECMAScript 中最常用的一个语句。
+
+### for-in语句
+
+for-in 语句是一种精准的迭代语句，可以用来枚举对象的属性。以下是 for-in 语句的语法：
+
+```javascript
+for (property in expression) statement
+```
+
+下面是一个示例：
+
+```javascript
+for (var propName in window) { 
+     document.write(propName); 
+}
+```
+
+在这个例子中，我们使用 for-in 循环来显示了 BOM 中 window 对象的所有属性。每次执行循环时，都会将 window 对象中存在的一个属性名赋值给变量 `propName`。这个过程会一直持续到对象中的所有属性都被枚举一遍为止。与 for 语句类似，这里控制语句中的 var 操作符也不是必需的。但是，为了保证使用局部变量，我们推荐上面例子中的这种做法。
+
+ECMAScript 对象的属性没有顺序。因此，通过 for-in 循环输出的属性名的顺序是不可预测的。具体来讲，所有属性都会被返回一次，但返回的先后次序可能会因浏览器而异。
+
+但是，如果表示要迭代的对象的变量值为 `null` 或 `undefined`，for-in 语句会抛出错误。ECMAScript 5 更正了这一行为；对这种情况不再抛出错误，而只是不执行循环体。为了保证最大限度的兼容性，建议在使用 for-in 循环之前，先检测确认该对象的值不是 null 或 undefined。
+
+### label语句
+
+使用 label 语句可以在代码中添加标签，以便将来使用。以下是 label 语句的语法：
+
+```javascript
+label: statement
+```
+
+下面是一个示例：
+
+```javascript
+start: for (var i=0; i < count; i++) { 
+    alert(i);  
+}
+```
+
+这个例子中定义的 start 标签可以在将来由 break 或 continue 语句引用。加标签的语句一般都要与 for 语句等循环语句配合使用。
+
+### break和continue语句
+
+break 和 continue 语句用于在循环中精确地控制代码的执行。其中，break 语句会立即退出循环，强制继续执行循环后面的语句。而 continue 语句虽然也是立即退出循环，但退出循环后会从循环的顶部继续执行。请看下面的例子：
+
+```javascript
+var num = 0; 
+ 
+for (var i=1; i < 10; i++) { 
+    if (i % 5 == 0) { 
+       break; 
+    } 
+    num++; 
+} 
+ 
+alert(num);    //4
+```
+
+这个例子中的 for 循环会将变量 i 由 1 递增至 10。在循环体内，有一个 if 语句检查 i 的值是否可以被 5 整除（使用求模操作符）。如果是，则执行 break 语句退出循环。另一方面，变量 num 从 0 开始，用于记录循环执行的次数。在执行 break 语句之后，要执行的下一行代码是 `alert()`函数，结果显示 4。也就是说，在变量 i 等于 5 时，循环总共执行了 4 次；而 break 语句的执行，导致了循环在num 再次递增之前就退出了。如果在这里把 break 替换为 continue 的话，则可以看到另一种结果：
+
+```javascript
+var num = 0; 
+ 
+for (var i=1; i < 10; i++) { 
+    if (i % 5 == 0) { 
+        continue; 
     }
+    num++; 
+} 
+
+alert(num);    //8
+```
+
+例子的结果显示 8，也就是循环总共执行了 8 次。当变量 i 等于 5 时，循环会在 num 再次递增之前退出，但接下来执行的是下一次循环，即 i 的值等于 6 的循环。于是，循环又继续执行，直到 i 等于10 时自然结束。而 num 的最终值之所以是 8，是因为 continue 语句导致它少递增了一次。
+
+break 和 continue 语句都可以与 label 语句联合使用，从而返回代码中特定的位置。这种联合使用的情况多发生在循环嵌套的情况下，如下面的例子所示：
+
+```javascript
+var num = 0; 
+ 
+outermost: 
+for (var i=0; i < 10; i++) { 
+     for (var j=0; j < 10; j++) { 
+        if (i == 5 && j == 5) { 
+            break outermost; 
+        } 
+        num++; 
+    } 
+} 
+ 
+alert(num);    //55
+```
+
+在这个例子中，outermost 标签表示外部的 for 语句。如果每个循环正常执行 10 次，则 `num++` 语句就会正常执行 100 次。换句话说，如果两个循环都自然结束，num 的值应该是 100。但内部循环中的 break 语句带了一个参数：要返回到的标签。添加这个标签的结果将导致 break 语句不仅会退出内部的 for 语句（即使用变量 j 的循环），而且也会退出外部的 for 语句（即使用变量 i 的循环）。为此，当变量 i 和 j 都等于 5 时，num 的值正好是 55。同样，continue 语句也可以像这样与 label 语句联用，如下面的例子所示：
+
+```javascript
+var num = 0; 
+ 
+outermost: 
+for (var i=0; i < 10; i++) { 
+    for (var j=0; j < 10; j++) { 
+        if (i == 5 && j == 5) { 
+            continue outermost; 
+        } 
+        num++; 
+    } 
+} 
+ 
+alert(num);    //95
+```
+
+在这种情况下，continue 语句会强制继续执行循环——退出内部循环，执行外部循环。当 j 是 5 时，continue 语句执行，而这也就意味着内部循环少执行了 5 次，因此 num 的结果是 95。
+
+虽然联用 break、continue 和 label 语句能够执行复杂的操作，但如果使用过度，也会给调试带来麻烦。在此，建议如果使用 label 语句，一定要使用描述性的标签，同时不要嵌套过多的循环。
+
+### with语句
+
+with 语句的作用是将代码的作用域设置到一个特定的对象中。with 语句的语法如下：
+
+```javascript
+with (expression) statement;
+```
+
+定义 with 语句的目的主要是为了简化多次编写同一个对象的工作，如下面的例子所示：
+
+```javascript
+var qs = location.search.substring(1); 
+var hostName = location.hostname; 
+var url = location.href;
+```
+
+上面几行代码都包含 location 对象。如果使用 with 语句，可以把上面的代码改写成如下所示：
+
+```javascript
+with(location){ 
+    var qs = search.substring(1); 
+    var hostName = hostname; 
+    var url = href; 
 }
 ```
 
-### 循环
+在这个重写后的例子中，使用 with 语句关联了 location 对象。这意味着在 with 语句的代码块内部，每个变量首先被认为是一个局部变量，而如果在局部环境中找不到该变量的定义，就会查询location 对象中是否有同名的属性。如果发现了同名属性，则以 location 对象属性的值作为变量的值。
 
-JavaScript的循环有两种，一种是`for`循环，通过初始条件、结束条件和递增条件来循环执行语句块：
+严格模式下不允许使用 with 语句，否则将视为语法错误。
 
-```javascript
-var x = 0;
-var i;
-for (i=1; i<=10000; i++) {
-    x = x + i;
-}
-x; // 50005000
-```
+> 由于大量使用 with 语句会导致性能下降，同时也会给调试代码造成困难，因此在开发大型应用程序时，不建议使用 with 语句。
 
-#### for
+### switch语句
 
-让我们来分析一下`for`循环的控制条件：
-
-- `i = 1` 这是初始条件，将变量`i`置为1；
-- `i <= 10000` 这是判断条件，满足时就继续循环，不满足就退出循环；
-- `i++` 这是每次循环后的递增条件，由于每次循环后变量`i`都会加1，因此它终将在若干次循环后不满足判断条件`i<=10000`而退出循环。
-
-`for`循环最常用的地方是利用索引来遍历数组：
+switch 语句与 if 语句的关系最为密切，而且也是在其他语言中普遍使用的一种流控制语句。ECMAScript 中 switch 语句的语法与其他基于 C 的语言非常接近，如下所示：
 
 ```javascript
-var arr = ['Apple', 'Google', 'Microsoft'];
-var i, x;
-for (i=0; i<arr.length; i++) {
-    x = arr[i];
-    console.log(x);
+switch (expression) { 
+  case value: statement 
+    break; 
+  case value: statement 
+    break; 
+  case value: statement 
+    break; 
+  case value: statement 
+    break;
+  default: statement 
 }
 ```
 
-`for`循环的3个条件都是可以省略的，如果没有退出循环的判断条件，就必须使用`break`语句退出循环，否则就是死循环：
+switch 语句中的每一种情形（case）的含义是：“如果表达式等于这个值（value），则执行后面的语句（statement）”。而 break 关键字会导致代码执行流跳出 switch 语句。如果省略 break 关键字，就会导致执行完当前 case 后，继续执行下一个 case。最后的 default 关键字则用于在表达式不匹配前面任何一种情形的时候，执行机动代码（因此，也相当于一个 else 语句）。
+
+从根本上讲，switch 语句就是为了让开发人员免于编写像下面这样的代码：
 
 ```javascript
-var x = 0;
-for (;;) { // 将无限循环下去
-    if (x > 100) {
-        break; // 通过if判断来退出循环
-    }
-    x ++;
+if (i == 25){ 
+  alert("25"); 
+} else if (i == 35) { 
+  alert("35"); 
+} else if (i == 45) { 
+  alert("45"); 
+} else { 
+  alert("Other"); 
 }
 ```
 
-#### for ... in
-
-`for`循环的一个变体是`for ... in`循环，它可以把一个对象的所有属性依次循环出来：
+而与此等价的 switch 语句如下所示：
 
 ```javascript
-var o = {
-    name: 'Jack',
-    age: 20,
-    city: 'Beijing'
-};
-for (var key in o) {
-    console.log(key); // 'name', 'age', 'city'
+switch (i) { 
+    case 25:  
+        alert("25"); 
+        break; 
+    case 35:  
+        alert("35"); 
+        break; 
+    case 45:  
+        alert("45"); 
+        break; 
+    default:  
+        alert("Other"); 
 }
 ```
 
-要过滤掉对象继承的属性，用`hasOwnProperty()`来实现：
+通过为每个 case 后面都添加一个 break 语句，就可以避免同时执行多个 case 代码的情况。假如确实需要混合几种情形，不要忘了在代码中添加注释，说明你是有意省略了 break 关键字，如下所示：
 
 ```javascript
-var o = {
-    name: 'Jack',
-    age: 20,
-    city: 'Beijing'
-};
-for (var key in o) {
-    if (o.hasOwnProperty(key)) {
-        console.log(key); // 'name', 'age', 'city'
-    }
+switch (i) { 
+    case 25:  
+        /* 合并两种情形 */ 
+    case 35:  
+        alert("25 or 35"); 
+        break; 
+    case 45:  
+        alert("45"); 
+        break; 
+    default:  
+        alert("Other"); 
 }
 ```
 
-由于`Array`也是对象，而它的每个元素的索引被视为对象的属性，因此，`for ... in`循环可以直接循环出`Array`的索引：
+虽然 ECMAScript 中的 switch 语句借鉴自其他语言，但这个语句也有自己的特色。首先，可以在 switch 语句中使用任何数据类型（在很多其他语言中只能使用数值），无论是字符串，还是对象都没有问题。其次，每个 case 的值不一定是常量，可以是变量，甚至是表达式。请看下面这个例子：
 
 ```javascript
-var a = ['A', 'B', 'C'];
-for (var i in a) {
-    console.log(i); // '0', '1', '2'
-    console.log(a[i]); // 'A', 'B', 'C'
+switch ("hello world") { 
+    case "hello" + " world":  
+        alert("Greeting was found."); 
+        break; 
+    case "goodbye":  
+        alert("Closing was found."); 
+        break; 
+    default:  
+        alert("Unexpected message was found."); 
 }
 ```
 
-**请注意**，`for ... in`对`Array`的循环得到的是`String`而不是`Number`。
-
-#### while
-
-`for`循环在已知循环的初始和结束条件时非常有用。而上述忽略了条件的`for`循环容易让人看不清循环的逻辑，此时用`while`循环更佳。
-
-`while`循环只有一个判断条件，条件满足，就不断循环，条件不满足时则退出循环。比如我们要计算100以内所有奇数之和，可以用while循环实现：
+在这个例子中，switch 语句使用的就是字符串。其中，第一种情形实际上是一个对字符串拼接操作求值的表达式。由于这个字符串拼接表达式的结果与 switch 的参数相等，因此结果就会显示"Greeting was found."。而且，使用表达式作为 case 值还可以实现下列操作：
 
 ```javascript
-var x = 0;
-var n = 99;
-while (n > 0) {
-    x = x + n;
-    n = n - 2;
-}
-x; // 2500
-```
-
-在循环内部变量`n`不断自减，直到变为`-1`时，不再满足`while`条件，循环退出。
-
-#### do ... while
-
-最后一种循环是`do { ... } while()`循环，它和`while`循环的唯一区别在于，不是在每次循环开始的时候判断条件，而是在每次循环完成的时候判断条件：
-
-```javascript
-var n = 0;
-do {
-    n = n + 1;
-} while (n < 100);
-n; // 100
-```
-
-用`do { ... } while()`循环要小心，循环体会至少执行1次，而`for`和`while`循环则可能一次都不执行。
-
-#### break和continue
-
-break 语句会立即退出循环， 强制继续执行循环后面的语句
-
-continue 语句虽然也是立即退出循环，但退出循环后会从循环的顶部继续执行
-
-### 其他
-
-#### with语句
-
-with 语句的作用是将代码的作用域设置到一个特定的对象中
-
-由于大量使用 with 语句会导致性能下降，同时也会给调试代码造成困难，因此 在开发大型应用程序时，不建议使用 with 语句
-
-#### switch语句
-
-```javascript
-switch (expression) {
-    case value: statement
-        break;
-    case value: statement
-        break;
-    case value: statement
-        break;
+var num = 25; 
+switch (true) { 
+    case num < 0:  
+        alert("Less than 0."); 
+        break; 
+    case num >= 0 && num <= 10:  
+        alert("Between 0 and 10."); 
+        break; 
+    case num > 10 && num <= 20:  
+        alert("Between 10 and 20."); 
+        break; 
+    default:  
+        alert("More than 20."); 
 }
 ```
+
+这个例子首先在 switch 语句外面声明了变量 num。而之所以给 switch 语句传递表达式 true，是因为每个 case 值都可以返回一个布尔值。这样，每个 case 按照顺序被求值，直到找到匹配的值或者遇到 default 语句为止（这正是这个例子的最终结果）。
 
 ## 函数
 
+函数对任何语言来说都是一个核心的概念。通过函数可以封装任意多条语句，而且可以在任何地方、任何时候调用执行。ECMAScript 中的函数使用 function 关键字来声明，后跟一组参数以及函数体。函数的基本语法如下所示：
+
 ```javascript
-function functionName(arg0, arg1,...,argN) {
-    statements
+function functionName(arg0, arg1,...,argN) { 
+    statements 
+}
+```
+
+以下是一个函数示例：
+
+```javascript
+function sayHi(name, message) { 
+    alert("Hello " + name + "," + message); 
+}
+```
+
+这个函数可以通过其函数名来调用，后面还要加上一对圆括号和参数（圆括号中的参数如果有多个，
+可以用逗号隔开）。调用 `sayHi()` 函数的代码如下所示：
+
+```javascript
+sayHi("Nicholas", "how are you today?");
+```
+
+这个函数的输出结果是“Hello Nicholas,how are you today?"。函数中定义中的命名参数 name
+和 message 被用作了字符串拼接的两个操作数，而结果最终通过警告框显示了出来。
+
+ECMAScript 中的函数在定义时不必指定是否返回值。实际上，任何函数在任何时候都可以通过
+return 语句后跟要返回的值来实现返回值。请看下面的例子：
+
+```javascript
+function sum(num1, num2) { 
+    return num1 + num2; 
+}
+```
+
+这个 sum()函数的作用是把两个值加起来返回一个结果。我们注意到，除了 return 语句之外，没有任何声明表示该函数会返回一个值。调用这个函数的示例代码如下：
+
+```javascript
+var result = sum(5, 10);
+```
+
+这个函数会在执行完 return 语句之后停止并立即退出。因此，位于 return 语句之后的任何代码都永远不会执行。例如：
+
+```javascript
+function sum(num1, num2) { 
+    return num1 + num2; 
+    alert("Hello world");    // 永远不会执行永远不会执行 
+}
+```
+
+在这个例子中，由于调用 `alert()` 函数的语句位于 return 语句之后，因此永远不会显示警告框。 当然，一个函数中也可以包含多个 return 语句，如下面这个例子中所示：
+
+```javascript
+function diff(num1, num2) { 
+    if (num1 < num2) { 
+        return num2 - num1; 
+    } else { 
+        return num1 - num2; 
+    } 
+}
+```
+
+这个例子中定义的 `diff()` 函数用于计算两个数值的差。如果第一个数比第二个小，则用第二个数减第一个数；否则，用第一个数减第二个数。代码中的两个分支都具有自己的 return 语句，分别用于
+执行正确的计算。
+
+另外，return 语句也可以不带有任何返回值。在这种情况下，函数在停止执行后将返回 undefined 值。这种用法一般用在需要提前停止函数执行而又不需要返回值的情况下。比如在下面这个例子中，就不会显示警告框：
+
+```javascript
+function sayHi(name, message) { 
+    return; 
+    alert("Hello " + name + "," + message);    //永远不会调用 
+}
+```
+
+严格模式对函数有一些限制：
+
++ 不能把函数命名为 eval 或 arguments；
++ 不能把参数命名为 eval 或 arguments；
++ 不能出现两个命名参数同名的情况。
+
+如果发生以上情况，就会导致语法错误，代码无法执行。
+
+### 理解参数
+
+ECMAScript 函数的参数与大多数其他语言中函数的参数有所不同。ECMAScript 函数不介意传递进来多少个参数，也不在乎传进来参数是什么数据类型。也就是说，即便你定义的函数只接收两个参数，在调用这个函数时也未必一定要传递两个参数。可以传递一个、三个甚至不传递参数，而解析器永远不会有什么怨言。之所以会这样，原因是 ECMAScript 中的参数在内部是用一个数组来表示的。函数接收到的始终都是这个数组，而不关心数组中包含哪些参数（如果有参数的话）。如果这个数组中不包含任何元素，无所谓；如果包含多个元素，也没有问题。实际上，在函数体内可以通过 arguments 对象来访问这个参数数组，从而获取传递给函数的每一个参数。
+
+其实，arguments 对象只是与数组类似（它并不是 Array 的实例），因为可以使用方括号语法访问它的每一个元素（即第一个元素是 `arguments[0]`，第二个元素是 `argumetns[1]`，以此类推），使用 length 属性来确定传递进来多少个参数。在前面的例子中，`sayHi()`函数的第一个参数的名字叫`name`，而该参数的值也可以通过访问 `arguments[0]`来获取。因此，那个函数也可以像下面这样重写，即不显式地使用命名参数：
+
+```javascript
+function sayHi() { 
+    alert("Hello " + arguments[0] + "," + arguments[1]); 
+}
+```
+
+这个重写后的函数中不包含命名的参数。虽然没有使用 `name` 和 `message` 标识符，但函数的功能依旧。这个事实说明了 ECMAScript 函数的一个重要特点：命名的参数只提供便利，但不是必需的。另外，在命名参数方面，其他语言可能需要事先创建一个函数签名，而将来的调用必须与该签名一致。但在 ECMAScript 中，没有这些条条框框，解析器不会验证命名参数。
+
+通过访问 arguments 对象的 length 属性可以获知有多少个参数传递给了函数。下面这个函数会在每次被调用时，输出传入其中的参数个数：
+
+```javascript
+function howManyArgs() { 
+    alert(arguments.length); 
 } 
+ 
+howManyArgs("string", 45);  //2 
+howManyArgs();              //0 
+howManyArgs(12);            //1
 ```
 
-使用`return`返回`return`后语句的返回值
-
-参数，ECMAScript 函数不介意传递进来多少个参数，也不在乎传进来参数是什么数据类型
-
-ECMAScript 函数不能像传统意义上那样实现重载
-
-如果在 ECMAScript 中定义了两个名字相同的函数，则该名字只属于后定义的函数
+执行以上代码会依次出现 3 个警告框，分别显示 2、0 和 1。由此可见，开发人员可以利用这一点让函数能够接收任意个参数并分别实现适当的功能。请看下面的例子：
 
 ```javascript
-function addSomeNumber(num){
-    return num + 100;
-}
-function addSomeNumber(num) {
-    return num + 200;
-}
-var result = addSomeNumber(100); 
-console.log(result); //300
+function doAdd() { 
+    if(arguments.length == 1) { 
+        alert(arguments[0] + 10); 
+    } else if (arguments.length == 2) { 
+        alert(arguments[0] + arguments[1]); 
+    } 
+} 
+ 
+doAdd(10);        //20 
+doAdd(30, 20);     //50
 ```
 
-通过检查传入函数中参数的类型和数量并作出不同的反应，可以模仿方法的重载
+函数 `doAdd()` 会在只有一个参数的情况下给该参数加上 10；如果是两个参数，则将那个参数简单相加并返回结果。因此，`doAdd(10)`会返回 20，而 `doAdd(30,20)`则返回 50。虽然这个特性算不上完美的重载，但也足够弥补 ECMAScript 的这一缺憾了。
+
+另一个与参数相关的重要方面，就是 arguments 对象可以与命名参数一起使用，如下面的例子所示：
+
+```javascript
+function doAdd(num1, num2) { 
+    if(arguments.length == 1) { 
+       alert(num1 + 10); 
+    } else if (arguments.length == 2) { 
+        alert(arguments[0] + num2); 
+    } 
+}
+```
+
+在重写后的这个 `doAdd()` 函数中，两个命名参数都与 arguments 对象一起使用。由于 num1 的值
+与 `arguments[0]` 的值相同，因此它们可以互换使用（当然，`num2` 和 `arguments[1]` 也是如此）。
+
+关于 arguments 的行为，还有一点比较有意思。那就是它的值永远与对应命名参数的值保持同步。例如：
+
+```javascript
+function doAdd(num1, num2) { 
+    arguments[1] = 10;     
+    alert(arguments[0] + num2); 
+}
+```
+
+每次执行这个 `doAdd()` 函数都会重写第二个参数，将第二个参数的值修改为 10。因为 arguments 对象中的值会自动反映到对应的命名参数，所以修改 `arguments[1]` ，也就修改了 `num2`，结果它们的值都会变成 10。不过，这并不是说读取这两个值会访问相同的内存空间；它们的内存空间是独立的，但它们的值会同步。另外还要记住，如果只传入了一个参数，那么为 `arguments[1]`设置的值不会反应到命名参数中。这是因为 arguments 对象的长度是由传入的参数个数决定的，不是由定义函数时的命名参数的个数决定的。
+
+关于参数还要记住最后一点：没有传递值的命名参数将自动被赋予 undefined 值。这就跟定义了变量但又没有初始化一样。例如，如果只给 `doAdd()` 函数传递了一个参数，则 `num2` 中就会保存
+undefined 值。
+
+严格模式对如何使用 arguments 对象做出了一些限制。首先，像前面例子中那样的赋值会变得无效。也就是说，即使把 `arguments[1]`设置为 10，num2 的值仍然还是 undefined。其次，重写
+arguments 的值会导致语法错误（代码将不会执行）。
+
+### 没有重载
+
+ECMAScript 函数不能像传统意义上那样实现重载。而在其他语言（如 Java）中，可以为一个函数编写两个定义，只要这两个定义的签名（接受的参数的类型和数量）不同即可。如前所述，ECMAScirpt函数没有签名，因为其参数是由包含零或多个值的数组来表示的。而没有函数签名，真正的重载是不可能做到的。
+
+如果在 ECMAScript 中定义了两个名字相同的函数，则该名字只属于后定义的函数。请看下面的例子：
+
+```javascript
+function addSomeNumber(num){ 
+    return num + 100; 
+} 
+ 
+function addSomeNumber(num) { 
+    return num + 200; 
+} 
+ 
+var result = addSomeNumber(100);    //300
+```
+
+在此，函数 `addSomeNumber()` 被定义了两次。第一个版本给参数加 100，而第二个版本给参数加 200。由于后定义的函数覆盖了先定义的函数，因此当在最后一行代码中调用这个函数时，返回的结果就是 300。
+
+如前所述，通过检查传入函数中参数的类型和数量并作出不同的反应，可以模仿方法的重载。
+
+
+
+
+
+## DOM
+
+文档对象模型（DOM，Document Object Model）是 HTML 和 XML 文档的编程接口。DOM 表示由多层节点构成的文档，通过它开发者可以添加、删除和修改页面的各个部分。脱胎于网景和微软早期的动态 HTML（DHTML，Dynamic HTML），DOM 现在是真正跨平台、语言无关的表示和操作网页的方式。
+
+DOM Level 1 在 1998 年成为 W3C 推荐标准，提供了基本文档结构和查询的接口。本章之所以介绍 DOM，主要因为它与浏览器中的 HTML 网页相关，并且在 JavaScript 中提供了 DOM API。
+
+### 节点层级
+
+任何 HTML 或 XML 文档都可以用 DOM 表示为一个由节点构成的层级结构。节点分很多类型，每种类型对应着文档中不同的信息和（或）标记，也都有自己不同的特性、数据和方法，而且与其他类型有某种关系。这些关系构成了层级，让标记可以表示为一个以特定节点为根的树形结构。以下面的 HTML 为例：
+

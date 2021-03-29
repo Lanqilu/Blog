@@ -7,7 +7,7 @@ categories:
 - Java基础
 ---
 
-> 参考资料：《Java核心技术 卷Ⅰ》（第11版）、《Java编程思想》（第4版）、《OnJava8》、《写给大忙人的JavaSE9核心技术》
+> 参考资料：《Java核心技术 卷Ⅰ》（第11版）、《Java编程思想》（第4版）、《OnJava8》
 
 ## Hello World
 

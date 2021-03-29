@@ -16,6 +16,23 @@ date: 2020-03-21 20:13:04
 
 ---
 
+## 学什么
+
++ yaml
++ 自动装配
++ 集成web开发
++ 集成数据库
++ 分布式开发
++ swagger
++ 任务调度
++ shiro
+
+## SpringBoot介绍
+
+
+
+
+
 ## 创建项目
 
 ### 项目环境
@@ -165,3 +182,16 @@ public class DemoApplication {
 `DemoApplication`还是一个启动引导类，这里的`main()`方法让你可以在命令行里把该应用程序当作一个可执行JAR文件来运行。这里向`SpringApplication.run()`传递了一个`DemoApplication`类的引用，还有命令行参数，通过这些东西启动应用程序。
 
  
+
+
+
+## SpringBoot自动装配
+
+依赖来自于父工程中
+
+
+
+
+
+
+

@@ -17,8 +17,6 @@ REST（REpresentational State Transfer）全称是 Resource Representational Sta
 
 URL定位资源，用HTTP动词（GET,POST,DELETE,DETC）描述操作。
 
-
-
 ### 创建类BolgController
 
 在包controller中创建类BolgController
@@ -112,25 +110,15 @@ public class BolgController {
 
 ![image-20201029185618289](E:\OneDrive - lanqilu\我的图片库\blogimg\Java-01-SpringBoot\image-20201029185618289.png)
 
-
-
 点击博客或搜索显示如下页面
-
-
 
 ![image-20201029191916914](E:\OneDrive - lanqilu\我的图片库\blogimg\Java-01-SpringBoot\image-20201029191916914.png)
 
-
-
 ![image-20201029191930191](E:\OneDrive - lanqilu\我的图片库\blogimg\Java-01-SpringBoot\image-20201029191930191.png)
-
-
 
 ## 带 Bootstrap 和 JQuery  的 Web 应用
 
 ### 添加依赖
-
-
 
 ## 接口文档 Swagger [入门](http://www.iocoder.cn/Spring-Boot/Swagger/)
 
@@ -150,8 +138,6 @@ public class BolgController {
 Swagger 是一个规范和完整的框架，用于生成、描述、调用和可视化 RESTful 风格的 Web 服务。
 
 总体目标是使客户端和文件系统作为服务器以同样的速度来更新。文件的方法、参数和模型紧密集成到服务器端的代码，允许 API 来始终保持同步。Swagger 让部署管理和使用功能强大的 API 从未如此简单。
-
-
 
 ### 引入依赖
 
@@ -202,7 +188,7 @@ public class SwaggerConfiguration {
                 .apiInfo(this.apiInfo())
                 // 扫描 Controller 包路径，获得 API 接口
                 .select()
-            	// 注意改成自己的包名
+                // 注意改成自己的包名
                 .apis(RequestHandlerSelectors.basePackage("com.halo.apidoc.controller"))
                 .paths(PathSelectors.any())
                 // 构建出 Docket 对象
@@ -257,4 +243,3 @@ public class Application {
 ![Swagger-UI 示例](E:\OneDrive - lanqilu\我的图片库\blogimg\Java-01-SpringBoot\01.png)
 
 至此，我们已经完成了 Swagger 的快速入门。不过考虑到胖友能够更好的使用，我们来一个一个注解了解。
-

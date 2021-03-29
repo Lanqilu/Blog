@@ -1,5 +1,5 @@
 ---
-title: LeetCode刷题记录
+title: LeetCode笔记
 date: 2020-11-14 18:19:34
 tags:
 - 算法

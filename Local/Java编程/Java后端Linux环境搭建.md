@@ -67,7 +67,45 @@ yum install git
 
 ## JDK安装
 
-安装Oracle JDK
+安装[Oracle JDK](https://www.oracle.com/cn/java/technologies/javase/javase-jdk8-downloads.html)
+
+![下载JDK](../../Image/Java后端Linux环境搭建/image-20210317233947278.png)
+
+将压缩包上传至`/develop/packge`文件夹中
+
+1.  创建⽬录并解压。创建`/develop/java` 文件夹并进⼊，解压
+
+   ```shell
+   cd /develop/java
+   tar -zxvf /develop/packge/jdk-8u281-linux-x64.tar.gz -C ./
+   ```
+
+   解压完之后， `/develop/java/` ⽬录中会出现⼀个`jdk1.8.0_281`的⽬录
+
+2. 配置JDK环境变量。编辑 `/etc/profile` ⽂件，在⽂件尾部加⼊如下 JDK 环境配置即可
+
+   ```shell
+   JAVA_HOME=/usr/local/java/jdk1.8.0_281
+   CLASSPATH=$JAVA_HOME/lib/
+   PATH=$PATH:$JAVA_HOME/bin
+   export PATH JAVA_HOME CLASSPATH
+   ```
+
+3. 执⾏如下命令让环境变量⽣效
+
+   ```java
+   source /etc/profile
+   ```
+
+4. 验证JDK安装结果
+
+   ```java
+   java -version
+   ```
+
+   ![image-20210317235018097](../../Image/Java后端Linux环境搭建/image-20210317235018097.png)
+
+
 
 
 

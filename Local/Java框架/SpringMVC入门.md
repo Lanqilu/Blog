@@ -7,19 +7,17 @@ categories:
 - Java框架
 ---
 
-
-
 ---
 
 ## 快速入门
 
 本小节，我们会使用 [`spring-boot-starter-web`](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web) 实现 SpringMVC 的自动化配置。然后实现用户的增删改查接口。接口列表如下：
 
-| 请求方法 | URL           | 功能                   |
-| :------- | :------------ | :--------------------- |
-| `GET`    | `/users`      | 查询用户列表           |
+| 请求方法     | URL           | 功能          |
+|:-------- |:------------- |:----------- |
+| `GET`    | `/users`      | 查询用户列表      |
 | `GET`    | `/users/{id}` | 获得指定用户编号的用户 |
-| `POST`   | `/users`      | 添加用户               |
+| `POST`   | `/users`      | 添加用户        |
 | `PUT`    | `/users/{id}` | 更新指定用户编号的用户 |
 | `DELETE` | `/users/{id}` | 删除指定用户编号的用户 |
 
@@ -71,8 +69,6 @@ categories:
 - `defaultValue` 属性：参数默认值。
 
 [`@PathVariable`](https://github.com/spring-projects/spring-framework/blob/master/spring-web/src/main/java/org/springframework/web/bind/annotation/PathVariable.java) 注解，添加在方法参数上，标记接口路径和方法参数的映射关系。具体的，我们在示例中来看。相比 `@RequestParam` 注解，少一个 `defaultValue` 属性。
-
-
 
 ## 引入依赖
 
@@ -223,4 +219,3 @@ public class UserController {
 
 }
 ```
-
