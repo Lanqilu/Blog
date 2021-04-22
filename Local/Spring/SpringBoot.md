@@ -29,10 +29,6 @@ date: 2020-03-21 20:13:04
 
 ## SpringBoot介绍
 
-
-
-
-
 ## 创建项目
 
 ### 项目环境
@@ -155,8 +151,6 @@ JDK1.8、Maven、SpringBoot2.2.4、IDEA
 
 + 启动主程序，进入[浏览器](http://localhost:8080/hello)，可以看到页面返回：Hello World
 
-
-
 ### 启动引导Spring
 
 创建SpringBoot项目后默认有一个DemoApplication类，其内容如下
@@ -180,10 +174,6 @@ public class DemoApplication {
 + Spring Boot 的 `@EnableAutoConfiguration` ： 这 个 不 起 眼 的 小 注 解 也 可 以 称 为`@Abracadabra`，就是这一行配置开启了Spring Boot自动配置的魔力，让你不用再写成篇的配置了。
 
 `DemoApplication`还是一个启动引导类，这里的`main()`方法让你可以在命令行里把该应用程序当作一个可执行JAR文件来运行。这里向`SpringApplication.run()`传递了一个`DemoApplication`类的引用，还有命令行参数，通过这些东西启动应用程序。
-
- 
-
-
 
 ## SpringBoot自动装配
 
